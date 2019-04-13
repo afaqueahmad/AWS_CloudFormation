@@ -1,6 +1,6 @@
 In this lab we are going to prvision/deploy 3-tier(Web,App,DB) complete infrastructre On AWS in one go using CloudFormation template.
 
-## 3-tier Infrastructure on AWS
+##multi-tier Infrastructure on AWS
 It includes provisioning of below listed AWS resources:
 VPC
 Subnet
@@ -11,6 +11,8 @@ Auto scaling grop
 Network ACL
 Internet Gateway
 Route Table
+
+![iam](https://github.com/afaqueahmad/AWS_CloudFormation/blob/master/multi-tier.png)
 
 
 Reference:
