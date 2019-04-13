@@ -1,4 +1,4 @@
-In this lab we are going to prvision/deploy 3-tier(Web,App,DB) complete infrastructre On AWS in one go using CloudFormation template.
+In this lab we are going to prvision/deploy 2-tier architecture(Highly available and scalable) complete infrastructre On AWS in one go using CloudFormation template.
 
 ##multi-tier Infrastructure on AWS
 It includes provisioning of below listed AWS resources:
