@@ -1,0 +1,1304 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Muti-tier infrstructure deployment",
+	"Parameters": {
+		"SSHLocation": {
+			"Description": "The IP address range that can be used to SSH to the EC2 instances",
+			"Type": "String",
+			"MinLength": "9",
+			"MaxLength": "18",
+			"Default": "0.0.0.0/0",
+			"AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+			"ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+		},
+		"KeyPair": {
+			"Description": "Name of key pair to access instances",
+			"Type": "AWS::EC2::KeyPair::KeyName",
+			"MinLength": "1",
+			"MaxLength": "255",
+			"AllowedPattern": "[\\x20-\\x7E]*",
+			"ConstraintDescription": "can contain only ASCII characters."
+		},
+		"HAZone01": {
+			"Description": "High availability zone-1",
+			"Type": "AWS::EC2::AvailabilityZone::Name"
+		},
+		"HAZone02": {
+			"Description": "High availability zone-1",
+			"Type": "AWS::EC2::AvailabilityZone::Name"
+		},
+		"WebServerInstanceType": {
+			"Description": "WebServer EC2 instance type",
+			"Type": "String",
+			"Default": "t2.micro",
+			"AllowedValues": [
+				"t1.micro",
+				"t2.nano",
+				"t2.micro",
+				"t2.small",
+				"t2.medium",
+				"t2.large",
+				"m1.small",
+				"m1.medium",
+				"m1.large",
+				"m1.xlarge",
+				"m2.xlarge",
+				"m2.2xlarge",
+				"m2.4xlarge",
+				"m3.medium",
+				"m3.large",
+				"m3.xlarge",
+				"m3.2xlarge",
+				"m4.large",
+				"m4.xlarge",
+				"m4.2xlarge",
+				"m4.4xlarge",
+				"m4.10xlarge",
+				"c1.medium",
+				"c1.xlarge",
+				"c3.large",
+				"c3.xlarge",
+				"c3.2xlarge",
+				"c3.4xlarge",
+				"c3.8xlarge",
+				"c4.large",
+				"c4.xlarge",
+				"c4.2xlarge",
+				"c4.4xlarge",
+				"c4.8xlarge",
+				"g2.2xlarge",
+				"g2.8xlarge",
+				"r3.large",
+				"r3.xlarge",
+				"r3.2xlarge",
+				"r3.4xlarge",
+				"r3.8xlarge",
+				"i2.xlarge",
+				"i2.2xlarge",
+				"i2.4xlarge",
+				"i2.8xlarge",
+				"d2.xlarge",
+				"d2.2xlarge",
+				"d2.4xlarge",
+				"d2.8xlarge",
+				"hi1.4xlarge",
+				"hs1.8xlarge",
+				"cr1.8xlarge",
+				"cc2.8xlarge",
+				"cg1.4xlarge"
+			],
+			"ConstraintDescription": "must be a valid EC2 instance type."
+		},
+		"AppServerInstanceType": {
+			"Description": "AppServer EC2 instance type",
+			"Type": "String",
+			"Default": "t2.micro",
+			"AllowedValues": [
+				"t1.micro",
+				"t2.nano",
+				"t2.micro",
+				"t2.small",
+				"t2.medium",
+				"t2.large",
+				"m1.small",
+				"m1.medium",
+				"m1.large",
+				"m1.xlarge",
+				"m2.xlarge",
+				"m2.2xlarge",
+				"m2.4xlarge",
+				"m3.medium",
+				"m3.large",
+				"m3.xlarge",
+				"m3.2xlarge",
+				"m4.large",
+				"m4.xlarge",
+				"m4.2xlarge",
+				"m4.4xlarge",
+				"m4.10xlarge",
+				"c1.medium",
+				"c1.xlarge",
+				"c3.large",
+				"c3.xlarge",
+				"c3.2xlarge",
+				"c3.4xlarge",
+				"c3.8xlarge",
+				"c4.large",
+				"c4.xlarge",
+				"c4.2xlarge",
+				"c4.4xlarge",
+				"c4.8xlarge",
+				"g2.2xlarge",
+				"g2.8xlarge",
+				"r3.large",
+				"r3.xlarge",
+				"r3.2xlarge",
+				"r3.4xlarge",
+				"r3.8xlarge",
+				"i2.xlarge",
+				"i2.2xlarge",
+				"i2.4xlarge",
+				"i2.8xlarge",
+				"d2.xlarge",
+				"d2.2xlarge",
+				"d2.4xlarge",
+				"d2.8xlarge",
+				"hi1.4xlarge",
+				"hs1.8xlarge",
+				"cr1.8xlarge",
+				"cc2.8xlarge",
+				"cg1.4xlarge"
+			],
+			"ConstraintDescription": "must be a valid EC2 instance type."
+		},
+		"DBServerInstanceType": {
+			"Description": "DBServer EC2 instance type",
+			"Type": "String",
+			"Default": "t2.micro",
+			"AllowedValues": [
+				"t1.micro",
+				"t2.nano",
+				"t2.micro",
+				"t2.small",
+				"t2.medium",
+				"t2.large",
+				"m1.small",
+				"m1.medium",
+				"m1.large",
+				"m1.xlarge",
+				"m2.xlarge",
+				"m2.2xlarge",
+				"m2.4xlarge",
+				"m3.medium",
+				"m3.large",
+				"m3.xlarge",
+				"m3.2xlarge",
+				"m4.large",
+				"m4.xlarge",
+				"m4.2xlarge",
+				"m4.4xlarge",
+				"m4.10xlarge",
+				"c1.medium",
+				"c1.xlarge",
+				"c3.large",
+				"c3.xlarge",
+				"c3.2xlarge",
+				"c3.4xlarge",
+				"c3.8xlarge",
+				"c4.large",
+				"c4.xlarge",
+				"c4.2xlarge",
+				"c4.4xlarge",
+				"c4.8xlarge",
+				"g2.2xlarge",
+				"g2.8xlarge",
+				"r3.large",
+				"r3.xlarge",
+				"r3.2xlarge",
+				"r3.4xlarge",
+				"r3.8xlarge",
+				"i2.xlarge",
+				"i2.2xlarge",
+				"i2.4xlarge",
+				"i2.8xlarge",
+				"d2.xlarge",
+				"d2.2xlarge",
+				"d2.4xlarge",
+				"d2.8xlarge",
+				"hi1.4xlarge",
+				"hs1.8xlarge",
+				"cr1.8xlarge",
+				"cc2.8xlarge",
+				"cg1.4xlarge"
+			],
+			"ConstraintDescription": "must be a valid EC2 instance type."
+		}
+	},
+	"Resources": {
+		"NATServer01": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+				"KeyName": {
+					"Ref": "KeyPair"
+				},
+				"InstanceType": "t2.micro",
+				"ImageId": "ami-02ace471",
+				"NetworkInterfaces": [{
+					"AssociatePublicIpAddress": "false",
+					"DeviceIndex": "0",
+					"SubnetId": {
+						"Ref": "NATSubnet01"
+					},
+					"GroupSet": [{
+						"Ref": "NATServerSecurityGroup"
+					}]
+					
+				}],
+				"Tags": [{
+					"Key": "Name",
+					"Value": "NATServer01"
+				}]
+
+			}
+		},
+		"NATServer02": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+				"KeyName": {
+					"Ref": "KeyPair"
+				},
+				"InstanceType": "t2.micro",
+				"ImageId": "ami-02ace471",
+				"NetworkInterfaces": [{
+					"AssociatePublicIpAddress": "false",
+					"DeviceIndex": "0",
+					"SubnetId": {
+						"Ref": "NATSubnet02"
+					},
+					"GroupSet": [{
+						"Ref": "NATServerSecurityGroup"
+					}]
+				
+
+				}],	
+				"Tags": [{
+					"Key": "Name",
+					"Value": "NATServer02"
+				}]
+			}
+		},
+		"NATServerSecurityGroup": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"GroupDescription": "Allow http/tcp to client host",
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"SecurityGroupIngress": [{
+					"IpProtocol": "tcp",
+					"FromPort": "22",
+					"ToPort": "22",
+					"CidrIp": "0.0.0.0/0"
+				}],
+				"SecurityGroupEgress": [{
+					"IpProtocol": "-1",
+					"CidrIp": "0.0.0.0/0"
+				}]
+			}
+		},
+		"WebServer01SecurityGroup": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"GroupDescription": "Allow http/tcp to client host",
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"SecurityGroupIngress": [{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.1.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.2.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "80",
+						"ToPort": "80",
+						"CidrIp": "0.0.0.0/0"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "443",
+						"ToPort": "443",
+						"CidrIp": "0.0.0.0/0"
+					}
+				],
+				"SecurityGroupEgress": [{
+					"IpProtocol": "-1",
+					"CidrIp": "0.0.0.0/0"
+				}]
+			}
+		},
+		"WebServer02SecurityGroup": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"GroupDescription": "Allow http/tcp to client host",
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"SecurityGroupIngress": [{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.1.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.2.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "80",
+						"ToPort": "80",
+						"CidrIp": "0.0.0.0/0"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "443",
+						"ToPort": "443",
+						"CidrIp": "0.0.0.0/0"
+					}
+				],
+				"SecurityGroupEgress": [{
+					"IpProtocol": "-1",
+					"CidrIp": "0.0.0.0/0"
+				}]
+			}
+		},
+		"ELBSecurityGroup": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"GroupDescription": " Security Group",
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"SecurityGroupIngress": [{
+						"IpProtocol": "tcp",
+						"FromPort": "80",
+						"ToPort": "80",
+						"CidrIp": "0.0.0.0/0"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "443",
+						"ToPort": "443",
+						"CidrIp": "0.0.0.0/0"
+					}
+				],
+				"SecurityGroupEgress": [{
+					"IpProtocol": "-1",
+					"CidrIp": "0.0.0.0/0"
+				}]
+			}
+		},
+		"AppSecurityGroup01": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"GroupDescription": "Enable SSH,HTTP,HTTPS access",
+				"SecurityGroupIngress": [{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.3.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.4.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "443",
+						"ToPort": "443",
+						"CidrIp": "10.0.3.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "80",
+						"ToPort": "80",
+						"CidrIp": "10.0.3.0/24"
+					}
+				],
+				"SecurityGroupEgress": [{
+					"IpProtocol": "-1",
+					"CidrIp": "0.0.0.0/0"
+				}]
+			}
+		},
+		"AppSecurityGroup02": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"GroupDescription": "Enable SSH,HTTP,HTTPS access ",
+				"SecurityGroupIngress": [{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.4.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.3.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "443",
+						"ToPort": "443",
+						"CidrIp": "10.0.4.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "80",
+						"ToPort": "80",
+						"CidrIp": "10.0.4.0/24"
+					}
+				],
+				"SecurityGroupEgress": [{
+					"IpProtocol": "-1",
+					"CidrIp": "0.0.0.0/0"
+				}]
+			}
+		},
+		"DBSecurityGroup01": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"GroupDescription": "Enable SSH,HTTP,HTTPS access",
+				"SecurityGroupIngress": [{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.5.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.6.0/24"
+					},
+						
+						{
+						"IpProtocol": "tcp",
+						"FromPort": "3306",
+						"ToPort": "3306",
+						"CidrIp": "10.0.6.0/24"
+					},
+				    
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "3306",
+						"ToPort": "3306",
+						"CidrIp": "10.0.5.0/24"
+					},
+					
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "443",
+						"ToPort": "443",
+						"CidrIp": "10.0.5.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "80",
+						"ToPort": "80",
+						"CidrIp": "10.0.5.0/24"
+					}
+				],
+				"SecurityGroupEgress": [{
+					"IpProtocol": "-1",
+					"CidrIp": "0.0.0.0/0"
+				}]
+			}
+		},
+		"DBSecurityGroup02": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"GroupDescription": "Enable SSH,HTTP,HTTPS access",
+				"SecurityGroupIngress": [{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.6.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "22",
+						"ToPort": "22",
+						"CidrIp": "10.0.5.0/24"
+					},
+					
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "3306",
+						"ToPort": "3306",
+						"CidrIp": "10.0.6.0/24"
+					},
+				    
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "3306",
+						"ToPort": "3306",
+						"CidrIp": "10.0.5.0/24"
+					},
+					
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "443",
+						"ToPort": "443",
+						"CidrIp": "10.0.6.0/24"
+					},
+					{
+						"IpProtocol": "tcp",
+						"FromPort": "80",
+						"ToPort": "80",
+						"CidrIp": "10.0.6.0/24"
+					}
+				],
+				"SecurityGroupEgress": [{
+					"IpProtocol": "-1",
+					"CidrIp": "0.0.0.0/0"
+				}]
+			}
+		},
+		"NATServer01EIP": {
+			"Type": "AWS::EC2::EIP",
+			"Properties": {
+				"InstanceId": {
+					"Ref": "NATServer01"
+				}
+			}
+		},
+		"NATServer02EIP": {
+			"Type": "AWS::EC2::EIP",
+			"Properties": {
+				"InstanceId": {
+					"Ref": "NATServer02"
+				}
+			}
+		},
+		"VPC": {
+			"Type": "AWS::EC2::VPC",
+			"Properties": {
+				"CidrBlock": "10.0.0.0/16",
+				"EnableDnsSupport": "true",
+				"EnableDnsHostnames": "true",
+				"InstanceTenancy": "default",
+				"Tags": [{
+					"Key": "awsnew1",
+					"Value": "bar"
+				}]
+			}
+		},
+		"InternetGateway": {
+			"Type": "AWS::EC2::InternetGateway",
+			"Properties": {}
+		},
+		"VPCGatewayAttachment": {
+			"Type": "AWS::EC2::VPCGatewayAttachment",
+			"Properties": {
+				"InternetGatewayId": {
+					"Ref": "InternetGateway"
+				},
+				"VpcId": {
+					"Ref": "VPC"
+				}
+			}
+		},
+		"PublicRouteTable": {
+			"Type": "AWS::EC2::RouteTable",
+			"Properties": {
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"Tags": [{
+					"Key": "Name",
+					"Value": "Public"
+				}]
+			}
+		},
+		"OutboundConnectionRoute": {
+			"Type": "AWS::EC2::Route",
+			"Properties": {
+				"DestinationCidrBlock": "0.0.0.0/0",
+				"GatewayId": {
+					"Ref": "InternetGateway"
+				},
+				"RouteTableId": {
+					"Ref": "PublicRouteTable"
+				}
+			}
+		},
+		"WebServer01SubnetRouteTableAssociation": {
+			"Type": "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties": {
+				"RouteTableId": {
+					"Ref": "PublicRouteTable"
+				},
+				"SubnetId": {
+					"Ref": "WebSubnet01"
+				}
+			}
+		},
+		"WebServer02SubnetRouteTableAssociation": {
+			"Type": "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties": {
+				"RouteTableId": {
+					"Ref": "PublicRouteTable"
+				},
+				"SubnetId": {
+					"Ref": "WebSubnet02"
+				}
+			}
+		},
+		"NATServer01SubnetRouteTableAssociation": {
+			"Type": "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties": {
+				"RouteTableId": {
+					"Ref": "PublicRouteTable"
+				},
+				"SubnetId": {
+					"Ref": "NATSubnet01"
+				}
+			}
+		},
+		"NATServer02SubnetRouteTableAssociation2": {
+			"Type": "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties": {
+				"RouteTableId": {
+					"Ref": "PublicRouteTable"
+				},
+				"SubnetId": {
+					"Ref": "NATSubnet02"
+				}
+			}
+		},
+		"NATSubnet01": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": {
+					"Ref": "HAZone01"
+				},
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"CidrBlock": "10.0.1.0/24",
+				"Tags": [{
+					"Key": "Name",
+					"Value": "NATSubnet01"
+				}]
+			}
+		},
+		"NATSubnet02": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": {
+					"Ref": "HAZone02"
+				},
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"CidrBlock": "10.0.2.0/24",
+				"Tags": [{
+					"Key": "Name",
+					"Value": "NATSubnet02"
+				}]
+			}
+		},
+		"WebSubnet01": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": {
+					"Ref": "HAZone01"
+				},
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"CidrBlock": "10.0.3.0/24",
+				"Tags": [{
+					"Key": "Name",
+					"Value": "WebSubnet01"
+				}]
+			}
+		},
+		"WebSubnet02": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": {
+					"Ref": "HAZone02"
+				},
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"CidrBlock": "10.0.4.0/24",
+				"Tags": [{
+					"Key": "Name",
+					"Value": "WebSubnet02"
+				}]
+			}
+		},
+		"AppSubnet01": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": {
+					"Ref": "HAZone01"
+				},
+				"CidrBlock": "10.0.5.0/24",
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"Tags": [{
+					"Key": "Name",
+					"Value": "AppSubnet01"
+				}]
+			}
+		},
+		"AppSubnet02": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": {
+					"Ref": "HAZone02"
+				},
+				"CidrBlock": "10.0.6.0/24",
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"Tags": [{
+					"Key": "Name",
+					"Value": "AppSubnet02"
+				}]
+			}
+		},
+		"DBSubnet01": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": {
+					"Ref": "HAZone01"
+				},
+				"CidrBlock": "10.0.7.0/24",
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"Tags": [{
+					"Key": "Name",
+					"Value": "DBSubnet01"
+				}]
+			}
+		},
+		"DBSubnet02": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": {
+					"Ref": "HAZone02"
+				},
+				"CidrBlock": "10.0.8.0/24",
+				"VpcId": {
+					"Ref": "VPC"
+				},
+				"Tags": [{
+					"Key": "Name",
+					"Value": "DBSubnet01"
+				}]
+			}
+		},
+		"DBServer01": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+				"ImageId": "ami-946b8fed",
+				"KeyName": {
+					"Ref": "KeyPair"
+				},
+				"PrivateIpAddress": "10.0.7.21",
+				"InstanceType": {
+					"Ref": "DBServerInstanceType"
+				},
+				"SubnetId": {
+					"Ref": "DBSubnet01"
+				},
+				"SecurityGroupIds": [{
+					"Ref": "DBSecurityGroup01"
+				}],
+				"Tags": [{
+					"Key": "Name",
+					"Value": "DBServer01"
+				}]
+			}
+		},
+		"DBServer02": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+				"ImageId": "ami-946b8fed",
+				"KeyName": {
+					"Ref": "KeyPair"
+				},
+				"PrivateIpAddress": "10.0.8.21",
+				"InstanceType": {
+					"Ref": "DBServerInstanceType"
+				},
+				"SubnetId": {
+					"Ref": "DBSubnet02"
+				},
+				"SecurityGroupIds": [{
+					"Ref": "DBSecurityGroup02"
+				}],
+				"Tags": [{
+					"Key": "Name",
+					"Value": "DBServer02"
+				}]
+			}
+		},
+		"NAT1SubnetNetworkAclAssociation": {
+			"Type": "AWS::EC2::SubnetNetworkAclAssociation",
+			"Properties": {
+				"SubnetId": {
+					"Ref": "NATSubnet01"
+				},
+				"NetworkAclId": {
+					"Ref": "NATNACL"
+				}
+			}
+		},
+		"NAT2SubnetNetworkAclAssociation": {
+			"Type": "AWS::EC2::SubnetNetworkAclAssociation",
+			"Properties": {
+				"SubnetId": {
+					"Ref": "NATSubnet02"
+				},
+				"NetworkAclId": {
+					"Ref": "NATNACL"
+				}
+			}
+		},
+		"NATNACL": {
+			"Type": "AWS::EC2::NetworkAcl",
+			"Properties": {
+				"VpcId": {
+					"Ref": "VPC"
+				}
+			}
+		},
+		"InboundSSHNATNACEntry01": {
+			"Type": "AWS::EC2::NetworkAclEntry",
+			"Properties": {
+				"NetworkAclId": {
+					"Ref": "NATNACL"
+				},
+				"RuleNumber": "100",
+				"Protocol": "6",
+				"RuleAction": "allow",
+				"Egress": "false",
+				"CidrBlock": "0.0.0.0/0",
+				"PortRange": {
+					"From": "22",
+					"To": "22"
+				}
+			}
+		},
+
+		"InboundSSHNATNACEntry02": {
+			"Type": "AWS::EC2::NetworkAclEntry",
+			"Properties": {
+				"NetworkAclId": {
+					"Ref": "NATNACL"
+				},
+				"RuleNumber": "200",
+				"Protocol": "-1",
+				"RuleAction": "allow",
+				"Egress": "false",
+				"CidrBlock": "10.0.4.0/24"
+			}
+		},
+		"InboundSSHNATNACEntry03": {
+			"Type": "AWS::EC2::NetworkAclEntry",
+			"Properties": {
+				"NetworkAclId": {
+					"Ref": "NATNACL"
+				},
+				"RuleNumber": "300",
+				"Protocol": "-1",
+				"RuleAction": "allow",
+				"Egress": "false",
+				"CidrBlock": "10.0.3.0/24"
+			}
+		},
+		"OUTboundSSHNATNACLEntry": {
+			"Type": "AWS::EC2::NetworkAclEntry",
+			"Properties": {
+				"NetworkAclId": {
+					"Ref": "NATNACL"
+				},
+				"RuleNumber": "100",
+				"Protocol": "-1",
+				"RuleAction": "allow",
+				"Egress": "true",
+				"CidrBlock": "0.0.0.0/0"
+			}
+		},	"WebServer01AutoscalingGroup": {
+			"Type": "AWS::AutoScaling::AutoScalingGroup",
+			"Properties": {
+				"AvailabilityZones": [{
+					"Ref": "HAZone01"
+				}],
+				"DesiredCapacity": 1,
+				"LaunchConfigurationName": {
+					"Ref": "WebServer01LaunchConf"
+				},
+				"LoadBalancerNames": [{
+					"Ref": "ELB"
+				}],
+				"MaxSize": 1,
+				"MinSize": 1,
+				"VPCZoneIdentifier": [{
+					"Ref": "WebSubnet01"
+				}],
+				"Tags": [{
+					"Key": "Name",
+					"Value": "WebServer01AutoscalingGroup",
+					"PropagateAtLaunch": "true"
+				}]
+			}
+		},
+		"WebServer01LaunchConf": {
+			"Type": "AWS::AutoScaling::LaunchConfiguration",
+			"Properties": {
+				"KeyName": {
+					"Ref": "KeyPair"
+				},
+				"ImageId": "ami-a87d99d1",
+				"InstanceType": {
+					"Ref": "WebServerInstanceType"
+				},
+				"SecurityGroups": [{
+					"Ref": "WebServer01SecurityGroup"
+				}]
+			}
+		},
+		"WebServer02AutoscalingGroup": {
+			"Type": "AWS::AutoScaling::AutoScalingGroup",
+			"Properties": {
+				"AvailabilityZones": [{
+					"Ref": "HAZone02"
+				}],
+				"DesiredCapacity": 1,
+				"LaunchConfigurationName": {
+					"Ref": "WebServer02LaunchConf"
+				},
+				"LoadBalancerNames": [{
+					"Ref": "ELB"
+				}],
+				"MaxSize": 1,
+				"MinSize": 1,
+				"VPCZoneIdentifier": [{
+					"Ref": "WebSubnet02"
+				}],
+				"Tags": [{
+					"Key": "Name",
+					"Value": "WebServer02AutoscalingGroup",
+					"PropagateAtLaunch": "true"
+				}]
+			}
+		},		"WebServer02LaunchConf": {
+			"Type": "AWS::AutoScaling::LaunchConfiguration",
+			"Properties": {
+				"KeyName": {
+					"Ref": "KeyPair"
+				},
+				"ImageId": "ami-997c98e0",
+				"InstanceType": {
+					"Ref": "WebServerInstanceType"
+				},
+				"SecurityGroups": [{
+					"Ref": "WebServer02SecurityGroup"
+				}]
+			}
+		},
+		 "scalingDecreaseGroupSizeG1": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "PolicyType": "StepScaling",
+        "StepAdjustments": [
+          {
+            "ScalingAdjustment": 0,
+            "MetricIntervalLowerBound": 0.0
+          }
+        ],
+        "AutoScalingGroupName": {
+          "Ref": "WebServer01AutoscalingGroup"
+        }
+      }
+    },
+    "scalingIncreaseGroupSizeG1": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "PolicyType": "StepScaling",
+        "StepAdjustments": [
+          {
+            "ScalingAdjustment": 0,
+            "MetricIntervalLowerBound": 0.0
+          }
+        ],
+        "AutoScalingGroupName": {
+          "Ref": "WebServer01AutoscalingGroup"
+        }
+      }
+    },
+ "scalingDecreaseGroupSizeG2": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "PolicyType": "StepScaling",
+        "StepAdjustments": [
+          {
+            "ScalingAdjustment": 0,
+            "MetricIntervalLowerBound": 0.0
+          }
+        ],
+        "AutoScalingGroupName": {
+          "Ref": "WebServer02AutoscalingGroup"
+        }
+      }
+    },
+    "scalingIncreaseGroupSizeG2": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "PolicyType": "StepScaling",
+        "StepAdjustments": [
+          {
+            "ScalingAdjustment": 0,
+            "MetricIntervalLowerBound": 0.0
+          }
+        ],
+        "AutoScalingGroupName": {
+          "Ref": "WebServer02AutoscalingGroup"
+        }
+      }
+    },
+ "alarmawCPUUtilizationG1": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "ActionsEnabled": "true",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "EvaluationPeriods": "1",
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Period": "900",
+        "Statistic": "Average",
+        "Threshold": "70.0",
+        "AlarmActions": [
+          {
+            "Ref": "scalingIncreaseGroupSizeG1"
+          }
+        ]
+      }
+    },
+    "alarmawsHighCPUUtilizationG1": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "ActionsEnabled": "true",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "EvaluationPeriods": "1",
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Period": "900",
+        "Statistic": "Average",
+        "Threshold": "15.0",
+        "AlarmActions": [
+          {
+            "Ref": "scalingDecreaseGroupSizeG1"
+          }
+        ]
+      }
+    },"alarmawCPUUtilizationG2": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "ActionsEnabled": "true",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "EvaluationPeriods": "1",
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Period": "900",
+        "Statistic": "Average",
+        "Threshold": "70.0",
+        "AlarmActions": [
+          {
+            "Ref": "scalingIncreaseGroupSizeG2"
+          }
+        ]
+      }
+    },
+    "alarmawsHighCPUUtilizationG2": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "ActionsEnabled": "true",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "EvaluationPeriods": "1",
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Period": "900",
+        "Statistic": "Average",
+        "Threshold": "15.0",
+        "AlarmActions": [
+          {
+            "Ref": "scalingDecreaseGroupSizeG2"
+          }
+        ]
+      }
+    },
+		"ELB": {
+			"Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+			"DependsOn": "VPCGatewayAttachment",
+			"Properties": {
+				"Listeners": [{
+					"LoadBalancerPort": "80",
+					"InstancePort": "80",
+					"Protocol": "HTTP"
+				}],
+				"SecurityGroups": [{
+					"Ref": "ELBSecurityGroup"
+				}],
+				"Subnets": [{
+						"Ref": "WebSubnet01"
+					},
+					{
+						"Ref": "WebSubnet02"
+					}
+				],
+				"CrossZone": "true",
+				"Tags": [{
+					"Key": "Name",
+					"Value": "LoadBalancer"
+				}]
+			}
+		},
+		"AppServer01": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+				"ImageId": "ami-1575916c",
+				"KeyName": {
+					"Ref": "KeyPair"
+				},
+				"PrivateIpAddress": "10.0.5.21",
+				"InstanceType": {
+					"Ref": "AppServerInstanceType"
+				},
+				"SubnetId": {
+					"Ref": "AppSubnet01"
+				},
+				"SecurityGroupIds": [{
+					"Ref": "AppSecurityGroup01"
+				}],
+				"Tags": [{
+					"Key": "Name",
+					"Value": "AppServer01"
+				}]
+			}
+		},
+		"AppServer02": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+				"ImageId": "ami-1575916c",
+				"KeyName": {
+					"Ref": "KeyPair"
+				},
+				"PrivateIpAddress": "10.0.6.21",
+				"InstanceType": {
+					"Ref": "AppServerInstanceType"
+				},
+				"SubnetId": {
+					"Ref": "AppSubnet02"
+				},
+				"SecurityGroupIds": [{
+					"Ref": "AppSecurityGroup02"
+				}],
+				"Tags": [{
+					"Key": "Name",
+					"Value": "AppServer02"
+				}]
+			}
+		}
+	},
+	"Outputs": {
+		"WebsiteURL": {
+			"Description": "URL for accessing the appalication",
+			"Value": {
+				"Fn::Join": [
+					"", [
+						"http://",
+						{
+							"Fn::GetAtt": [
+								"ELB",
+								"DNSName"
+							]
+						}
+					]
+				]
+			}
+		},
+		"NATServer01PublicIpAddress": {
+			"Description": "NAT server 1 public IP address",
+			"Value": {
+				"Fn::GetAtt": [
+					"NATServer01",
+					"PublicIp"
+				]
+			}
+		},
+		"NATServer02PublicIpAddress": {
+			"Description": "NAT server 2 public IP address",
+			"Value": {
+				"Fn::GetAtt": [
+					"NATServer02",
+					"PublicIp"
+				]
+			}
+		},
+		"AppServer01PrivateIpAddress": {
+			"Description": "AppServer-1 private IP address",
+			"Value": {
+				"Fn::GetAtt": [
+					"AppServer01",
+					"PrivateIp"
+				]
+			}
+		},
+		"AppServer02PrivateIpAddress": {
+			"Description": "AppServer-2 private IP address",
+			"Value": {
+				"Fn::GetAtt": [
+					"AppServer02",
+					"PrivateIp"
+				]
+			}
+		},
+		"DBServer01PrivateIpAddress": {
+			"Description": "DBServer-1 private IP address",
+			"Value": {
+				"Fn::GetAtt": [
+					"DBServer01",
+					"PrivateIp"
+				]
+			}
+		},
+		"DBServer02PrivateIpAddress": {
+			"Description": "DBServer-2 private IP address",
+			"Value": {
+				"Fn::GetAtt": [
+					"DBServer02",
+					"PrivateIp"
+				]
+			}
+		}
+	}
+}
