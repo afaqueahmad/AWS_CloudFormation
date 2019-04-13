@@ -1,4 +1,4 @@
-In this lab we are going to prvision/deploy 2-tier architecture(Highly available and scalable) complete infrastructre On AWS in one go using CloudFormation template.
+In this lab we are going to prvision/deploy 3-tier architecture(Highly available and scalable) complete infrastructre On AWS in one go using CloudFormation template.
 
 ##multi-tier Infrastructure on AWS
 It includes provisioning of below listed AWS resources:
@@ -11,7 +11,7 @@ Auto scaling grop
 Network ACL
 Internet Gateway
 Route Table
-
+Below diagram shows only 2-tier architecture, however JSON Template contains 3-tier architecture code. 
 ![iam](https://github.com/afaqueahmad/AWS_CloudFormation/blob/master/multi-tier.png)
 
 
