@@ -30,5 +30,27 @@ Allows you to version control your aws infrastructure.
 Deploy and update the stacks using console, command line or API.
 Best thing is you only pay the resources you create.
 
+## Create CloudFormation Stack using JSON Template
+
+Sign in to the AWS Management Console and open the AWS CloudFormation console at https://console.aws.amazon.com/cloudformation.
+
+If this is a new AWS CloudFormation account, click Create New Stack. Otherwise, click Create Stack.
+
+Choose upload template from local machine.
+
+
+In the Specify Details section, enter a stack name in the Name field. For this example, use MyWPTestStack. The stack name cannot contain spaces.
+
+In the KeyName field, enter the name of a valid Amazon EC2 key pair in the same region you are creating the stack.
+
+Note
+
+On the Specify Parameters page, you'll recognize the parameters from the Parameters section of the template.
+
+Click Next.
+
+In this scenario, we won't add any tags. Click Next. Tags, which are key-value pairs, can help you identify your stacks. For more information, see Adding Tags to Your AWS CloudFormation Stack.
+
+Review the information for the stack. When you're satisfied with the settings, click Create.
 
 
